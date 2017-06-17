@@ -22,13 +22,26 @@ class ViewController: UIViewController {
         return button
     }()
     
+    let textBox: UITextView = {
+        let textView = UITextView()
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.isEditable = false
+        return textView
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        self.view.addSubview(textBox)
+        textBox.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        textBox.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        textBox.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        textBox.heightAnchor.constraint(equalToConstant: 500).isActive = true
+        
         self.view.addSubview(startScanButton)
         startScanButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        startScanButton.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        startScanButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20).isActive = true
         startScanButton.addTarget(self, action: #selector(startScanButtonTapped), for: .touchUpInside)
     }
     
@@ -41,20 +54,29 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
+    func printConsole(_ str: String) {
+        if textBox.text.count > 0 {
+            textBox.text.append("\n")
+        }
+        textBox.text.append(str)
+        
+        
+        textBox.scrollRectToVisible(CGRect(x: 0, y: textBox.contentSize.height-1, width: textBox.contentSize.width, height: 1), animated: true)
+    }
 
 }
 
 extension ViewController: NFCNDEFReaderSessionDelegate {
     func readerSession(_ session: NFCNDEFReaderSession, didInvalidateWithError error: Error) {
-        print(error.localizedDescription)
+        printConsole(error.localizedDescription)
     }
     
     func readerSession(_ session: NFCNDEFReaderSession, didDetectNDEFs messages: [NFCNDEFMessage]) {
         for message in messages {
             for record in message.records {
                 if let string = String(data: record.payload, encoding: .ascii) {
-                    print(string)
+                    printConsole(string)
                 }
             }
         }
